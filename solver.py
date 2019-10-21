@@ -159,33 +159,36 @@ class Solver:
                 if self.map[line_num * WIDTH + row_num].type == Type.OPTIONS:
                     self.__fill_options_for_element(line_num, row_num)
 
-    def __find_pairs_in_array(self, values):
+    def __find_pairs(self, values):
         ret = 0
-        count = 0
-        element = []
-        for value in values:
-            if value.type == Type.OPTIONS:
-                if len(value.options) == 2:
-                    # Go though all elements and search cells with two options
-                    count += 1
-                    element.append(value)
+        list_numbers = []
+        list_pairs = []
+        for number in range(1,10):
+            tmp_list = []
+            for value in values:
+                if value.type == Type.OPTIONS:
+                    if number in value.options:
+                        tmp_list.append(value)
+            if len(tmp_list) == 2:
+                # Go though all elements and search option that exist only in two cells
+                list_numbers.append(number)
+                list_pairs.append(tmp_list)
+
         # If we find 2 or more element
         # possibly we have pair
-        if count >= 2:
-            for i in range(count):
-                for j in range(i + 1, count):
-                    if element[i].options == element[j].options:
-                        # If we find pair remove options from others elements in array
-                        for value in values:
-                            if value.type == Type.OPTIONS:
-                                if value == element[i] or value == element[j]:
-                                    # Skip same element
-                                    continue
-                                for option in element[i].options:
-                                    if option in value.options:
-                                        # If value from pair contains in option - remove it
-                                        ret = 1
-                                        value.options.remove(option)
+        if len(list_pairs) >= 2:
+            for i in range(0, len(list_pairs) - 1):
+                for j in range(i + 1, len(list_pairs)):
+                    if list_pairs[i][0] == list_pairs[j][0] and list_pairs[i][1] == list_pairs[j][1] :
+                        # If two cell have two same element - it's pair
+                        if len(list_pairs[i][0].options) != 2:
+                            # If cell how more than two option, remove others
+                            ret = 1
+                            list_pairs[i][0].options = [list_numbers[i], list_numbers[j]]
+                        if len(list_pairs[i][1].options) != 2:
+                            # If cell how more than two option, remove others
+                            ret = 1
+                            list_pairs[i][1].options = [list_numbers[i], list_numbers[j]]
         return ret
 
     def fill_options(self):
@@ -196,13 +199,13 @@ class Solver:
         while 1:
             ret = 0
             for i in range(HEIGHT):
-                if self.__find_pairs_in_array(self.__get_line(i)) == 1:
+                if self.__find_pairs(self.__get_line(i)) == 1:
                     ret = 1
-            for i in range(WIDTH):
-                if self.__find_pairs_in_array(self.__get_row(i)) == 1:
+            for i in range(HEIGHT):
+                if self.__find_pairs(self.__get_row(i)) == 1:
                     ret = 1
-            for i in range(9):
-                if self.__find_pairs_in_array(self.__get_block(i)) == 1:
+            for i in range(HEIGHT):
+                if self.__find_pairs(self.__get_block(i)) == 1:
                     ret = 1
             if ret == 0:
                 break
