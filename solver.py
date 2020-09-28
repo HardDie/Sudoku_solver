@@ -27,25 +27,6 @@ class Solver:
         self.map = []
 
 ###
-# Init functions
-###
-
-    def read(self, filename):
-        self.map = [Value() for _ in range(WIDTH * HEIGHT)]
-        file = open(filename, 'r')
-        lines = file.read().splitlines()
-
-        row_num = line_num = 0
-        for line in lines:
-            row_num = 0
-            for symb in line:
-                if symb != '.':
-                    self.map[line_num * WIDTH + row_num].type = Type.VALUE
-                    self.map[line_num * WIDTH + row_num].value = int(symb)
-                row_num += 1
-            line_num += 1
-
-###
 # Print functions
 ###
 
@@ -84,13 +65,6 @@ class Solver:
                 self.__print_element(value, i)
             print("|")
 
-    def print_data(self):
-        for line_num in range(HEIGHT):
-            if line_num % 3 == 0:
-                print('-------------------------------------------')
-            self.__print_line(self.__get_line(line_num))
-            print('|             |             |             |')
-        print('-------------------------------------------')
 
 ###
 # Utils functions
@@ -191,7 +165,7 @@ class Solver:
                             list_pairs[i][1].options = [list_numbers[i], list_numbers[j]]
         return ret
 
-    def fill_options(self):
+    def __fill_options(self):
         self.__flush_options()
         self.__simple_fill_options()
 
@@ -242,7 +216,7 @@ class Solver:
         return ret
 
 
-    def solve_step(self):
+    def __solve_step(self):
         if self.__set_one_options() == 1:
             return 1
         for i in range(HEIGHT):
@@ -256,17 +230,44 @@ class Solver:
                 return 1
         return 0
 
+
+###
+# API functions
+###
+    def read(self, filename):
+        self.map = [Value() for _ in range(WIDTH * HEIGHT)]
+        file = open(filename, 'r')
+        lines = file.read().splitlines()
+
+        row_num = line_num = 0
+        for line in lines:
+            row_num = 0
+            for symb in line:
+                if symb != '.':
+                    self.map[line_num * WIDTH + row_num].type = Type.VALUE
+                    self.map[line_num * WIDTH + row_num].value = int(symb)
+                row_num += 1
+            line_num += 1
+
+    def print_data(self):
+        for line_num in range(HEIGHT):
+            if line_num % 3 == 0:
+                print('-------------------------------------------')
+            self.__print_line(self.__get_line(line_num))
+            print('|             |             |             |')
+        print('-------------------------------------------')
+
+    def solve(self):
+        while 1:
+            self.__fill_options()
+            if solver.__solve_step() == 1:
+                continue
+            break
+
+
 solver = Solver()
 
 solver.read('hard')
 solver.print_data()
-
-while 1:
-    solver.fill_options()
-
-    if solver.solve_step() == 1:
-        continue
-
-    break
-
+solver.solve()
 solver.print_data()
